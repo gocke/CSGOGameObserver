@@ -28,6 +28,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Windows.Threading;
+using CSGOGameObserver.Helpers;
 using CSGOGameObserverSDK;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -44,8 +45,10 @@ namespace CSGOGameObserver
         private Boolean bombPlanted;
         private DispatcherTimer bombTimer;
         public double timeLeft = BOMBTIME;
+        public double timeLeftTest = BOMBTIME;
         private object Object1 = new object();
         private DateTime bombStartDateTime = DateTime.Now;
+        private DateTime bombStartDateTimeTest;
 
         public MainWindow()
         {
@@ -84,13 +87,17 @@ namespace CSGOGameObserver
                     if (gameData["round"]?["bomb"] != null)
                     {
                         bombStartDateTime = DateTime.Now;
+
+                        long currentTime = gameData["provider"].Value<long>("timestamp");
+                        bombStartDateTime = TimeHelper.UnixTimeStampInSecondsToDateTime(currentTime);
+
                         bombPlanted = true;
                         bombTimer.Start();
                     }
                 }
                 if (bombPlanted)
                 {
-                    if (gameData["round"]?["bomb"] == null || gameData["round"]["bomb"].ToString() == "defused")
+                    if (gameData["round"]?["bomb"] == null || gameData["round"].Value<String>("defused") == "defused")
                     {
                         bombPlanted = false;
                         bombTimer.Stop();
@@ -127,7 +134,7 @@ namespace CSGOGameObserver
                     (Action) (() => InfoTextBlock.Text = "It's gonna Blow!"));
             }
 
-            timeLeft = BOMBTIME - (DateTime.Now - bombStartDateTime).TotalSeconds;
+            timeLeft = BOMBTIME - (DateTime.UtcNow - bombStartDateTime).TotalSeconds;
         }
 
         static void RestartAsAdmin()
