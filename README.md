@@ -1,4 +1,4 @@
-![ss+(2015-12-12+at+10.44.27).png](https://bitbucket.org/repo/AdxE7X/images/64067651-ss+(2015-12-12+at+10.44.27).png)
+![aaa.png](https://bitbucket.org/repo/AdxE7X/images/232290055-aaa.png)
 
 ### About ###
 
