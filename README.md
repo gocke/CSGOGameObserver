@@ -5,7 +5,9 @@
 
 ## Install/Run Instructions ##
 
-Unzip to a location of your choice. Place gamestate_integration_master117.cfg at steamapps\common\Counter-Strike Global Offensive\csgo\cfg . Run CSGOGameObserver (as Admin).
+* Unzip to a location of your choice 
+* Place gamestate_integration_master117.cfg at steamapps\common\Counter-Strike Global Offensive\csgo\cfg 
+* Run CSGOGameObserver (as Admin)
 
 ## How can I Contribution? ##
 
