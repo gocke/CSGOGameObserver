@@ -30,6 +30,7 @@ using System.Windows.Shapes;
 using System.Windows.Threading;
 using CSGOGameObserver.Helpers;
 using CSGOGameObserverSDK;
+using CSGOGameObserverSDK.GameDataTypes;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
@@ -80,15 +81,16 @@ namespace CSGOGameObserver
         private void OnReceivedCsgoServerMessage(object sender, JObject gameData)
         {
             //Prevent Racing conditions, events might be multithreaded
+
+            CSGOGameState csgoGameState = new CSGOGameState(gameData);
+
             lock (Object1)
             {
                 if (!bombPlanted)
                 {
-                    if (gameData["round"]?["bomb"] != null)
+                    if (csgoGameState.Round.Bomb != null && csgoGameState.Provider.Timestamp != null)
                     {
-                        bombStartDateTime = DateTime.Now;
-
-                        long currentTime = gameData["provider"].Value<long>("timestamp");
+                        long currentTime = (long) csgoGameState.Provider.Timestamp;
                         bombStartDateTime = TimeHelper.UnixTimeStampInSecondsToDateTime(currentTime);
 
                         bombPlanted = true;

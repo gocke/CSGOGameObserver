@@ -34,6 +34,9 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationIcon>black-burning-bomb-icon64x64.ico</ApplicationIcon>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="CSGOGameObserverSDK">
       <HintPath>..\..\CSGOGameObserverSDK\CSGOGameObserverSDK\bin\Debug\CSGOGameObserverSDK.dll</HintPath>
@@ -103,6 +106,12 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="black-burning-bomb-icon64x64.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="black-burning-bomb-icon64x64.ico" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

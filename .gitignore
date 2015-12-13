@@ -44,3 +44,8 @@
 /packages/Newtonsoft.Json.7.0.1/tools/install.ps1
 /.vs/CSGOGameObserver/v14/*.suo
 /.vs
+/CSGOGameObserver/obj/Debug/CSGOGameObserver_Content.g.i.cs
+/CSGOGameObserver.zip
+/Thumbs.db
+/black-burning-bomb-icon64x64.ico
+/black-burning-bomb-icon64x64.png
