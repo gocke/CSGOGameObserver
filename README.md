@@ -1,6 +1,6 @@
 ![aaa.png](https://bitbucket.org/repo/AdxE7X/images/232290055-aaa.png)
 
-### About ###
+## About ##
 
 * This is a Tool that shows useful stats during a Game of CSGO, at the moment only bomb time left is supported.
 * It is based on [CSGOGameObserverSDK](https://bitbucket.org/master117/csgogameobserversdk)
