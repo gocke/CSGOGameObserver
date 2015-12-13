@@ -45,17 +45,13 @@ namespace CSGOGameObserver
 
         private Boolean bombPlanted;
         private DispatcherTimer bombTimer;
-        public double timeLeft = BOMBTIME;
-        public double timeLeftTest = BOMBTIME;
+        private double timeLeft = BOMBTIME;
+        private double timeLeftTest = BOMBTIME;
         private object Object1 = new object();
         private DateTime bombStartDateTime = DateTime.Now;
-        private DateTime bombStartDateTimeTest;
 
         public MainWindow()
         {
-            if(!IsAdministrator())
-                RestartAsAdmin();
-
             InitializeComponent();
 
             bombTimer = new DispatcherTimer();
@@ -137,19 +133,6 @@ namespace CSGOGameObserver
             }
 
             timeLeft = BOMBTIME - (DateTime.UtcNow - bombStartDateTime).TotalSeconds;
-        }
-
-        static void RestartAsAdmin()
-        {
-            var startInfo = new ProcessStartInfo("CSGOGameObserver.exe") { Verb = "runas" };
-            Process.Start(startInfo);
-            Environment.Exit(0);
-        }
-
-        public static bool IsAdministrator()
-        {
-            return (new WindowsPrincipal(WindowsIdentity.GetCurrent()))
-                    .IsInRole(WindowsBuiltInRole.Administrator);
         }
     }
 }
