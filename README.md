@@ -3,6 +3,7 @@
 ## About ##
 
 * This is a Tool that shows useful stats during a Game of CSGO and offers a range of useful settings.
+* Set Vibrance Level, CSGO Audio Device and Windows Autostart.
 * It is based on [CSGOGameObserverSDK](https://bitbucket.org/master117/csgogameobserversdk)
 * Version 1.1
 
