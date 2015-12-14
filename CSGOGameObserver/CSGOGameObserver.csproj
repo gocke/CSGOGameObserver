@@ -35,7 +35,7 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup>
-    <ApplicationIcon>black-burning-bomb-icon64x64.ico</ApplicationIcon>
+    <ApplicationIcon>Images\black-burning-bomb-icon64x64.ico</ApplicationIcon>
   </PropertyGroup>
   <PropertyGroup>
     <ApplicationManifest>app.manifest</ApplicationManifest>
@@ -50,6 +50,7 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
+    <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Core" />
@@ -68,6 +69,15 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="AudioDeviceSwitcher\AudioDevice.cs" />
+    <Compile Include="AudioDeviceSwitcher\AudioDeviceController.cs" />
+    <Compile Include="UIControls\StartCheckBoxesUserControl.xaml.cs">
+      <DependentUpon>StartCheckBoxesUserControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="UIControls\VibranceAndAudioUserControl.xaml.cs">
+      <DependentUpon>VibranceAndAudioUserControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="UIControls\VibranceProxy.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -81,6 +91,14 @@
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Page Include="UIControls\StartCheckBoxesUserControl.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="UIControls\VibranceAndAudioUserControl.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs">
@@ -112,10 +130,19 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="black-burning-bomb-icon64x64.png" />
+    <Resource Include="Images\black-burning-bomb-icon64x64.png" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="black-burning-bomb-icon64x64.ico" />
+    <Resource Include="Images\black-burning-bomb-icon64x64.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\CSGOGameObserverUI_Settings.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="EndPointController.exe">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="vibranceDLL.dll" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

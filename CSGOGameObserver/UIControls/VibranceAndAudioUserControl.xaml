@@ -1,0 +1,54 @@
+﻿<UserControl x:Class="CSGOGameObserver.UIControls.VibranceAndAudioUserControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:properties="clr-namespace:CSGOGameObserver.Properties"
+             mc:Ignorable="d" Loaded="VibranceAndAudioUserControl_OnLoaded">
+    <Grid>
+        <StackPanel VerticalAlignment="Center" HorizontalAlignment="Left">
+            <CheckBox Name="UseVibranceSettingsCheckBox" VerticalContentAlignment="Center" Content="Use Vibrance Settings" Foreground="White" FontSize="14"  IsChecked="{Binding Source={x:Static properties:Settings.Default}, Path=UseVibrance, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+            <StackPanel Orientation="Horizontal" Margin="0,2,0,0">
+                <Border BorderThickness="1" BorderBrush="Gray" Padding="3">
+                    <StackPanel Height="60" Width="150">
+                        <TextBlock Name="WindowsVibranceLevelTextBlock" Text="Win Vibrance:" Foreground="White" FontSize="14"  />
+                        <StackPanel Orientation="Horizontal" Margin="5,10">
+                            <Slider Name="WindowsVibranceLevelSlider" Minimum="0" Maximum="100"  IsSnapToTickEnabled="True" TickFrequency="1" Value="{Binding Source={x:Static properties:Settings.Default}, Path=WindowsVibranceLevel, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Width="100" />
+                            <TextBox Text="{Binding ElementName=WindowsVibranceLevelSlider,Path=Value}" Margin="5,0,0,0" Width="25" />
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+                <Border BorderThickness="1" BorderBrush="Gray" Padding="3" Margin="5,0">
+                    <StackPanel Height="60" Width="150">
+                        <TextBlock Name="InGameVibranceLevelTextBlock" Text="CS GO Vibrance:" Foreground="White" FontSize="14"  />
+                        <StackPanel Orientation="Horizontal" Margin="5,10">
+                            <Slider Name="InGameVibranceLevelSlider" Minimum="0" Maximum="100"  IsSnapToTickEnabled="True" TickFrequency="1" Value="{Binding Source={x:Static properties:Settings.Default}, Path=InGameVibranceLevel, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Width="100" />
+                            <TextBox Text="{Binding ElementName=InGameVibranceLevelSlider,Path=Value}" Margin="5,0,0,0" Width="25" />
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+            <Border BorderThickness="1" BorderBrush="Gray" Padding="3" Margin="0,5,0,0" HorizontalAlignment="Left">
+                <StackPanel Height="60" Width="150" >
+                    <TextBlock Name="RefreshRateTextBlock" Text="RefreshRate (ms):" Foreground="White" FontSize="14"  />
+                    <TextBox Name="RefreshRateTextBox" Text="{Binding Source={x:Static properties:Settings.Default}, Path=RefreshRate, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Width="100" HorizontalAlignment="Left" Margin="5,10" />
+                </StackPanel>
+            </Border>
+            <CheckBox Name="UseAudioSettingsCheckBox" VerticalContentAlignment="Center" Content="Use Audio Settings" Foreground="White" FontSize="14"  IsChecked="{Binding Source={x:Static properties:Settings.Default}, Path=UseAudio, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Margin="0,5,0,0" />
+            <StackPanel Orientation="Horizontal" Margin="0,2,0,0">
+                <Border BorderThickness="1" BorderBrush="Gray" Padding="3">
+                    <StackPanel Height="60" Width="150">
+                        <TextBlock Name="WindowsAudioDeviceTextBlock" Text="Win AudioDevice:" Foreground="White" FontSize="14"  />
+                        <ComboBox Name="WindowsAudioDeviceComboBox" SelectedIndex="{Binding Source={x:Static properties:Settings.Default}, Path=WindowsAudioDevice, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Margin="5,10" />
+                    </StackPanel>
+                </Border>
+                <Border BorderThickness="1" BorderBrush="Gray" Padding="3" Margin="5,0">
+                    <StackPanel Height="60" Width="150">
+                        <TextBlock Name="InGameAudioDeviceTextBlock" Text="CS GO AudioDevice:" Foreground="White" FontSize="14" />
+                        <ComboBox Name="InGameAudioDeviceComboBox" SelectedIndex="{Binding Source={x:Static properties:Settings.Default}, Path=InGameAudioDevice, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Margin="5,10" />
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+        </StackPanel>
+    </Grid>
+</UserControl>

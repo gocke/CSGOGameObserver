@@ -46,7 +46,6 @@ namespace CSGOGameObserver
         private Boolean bombPlanted;
         private DispatcherTimer bombTimer;
         private double timeLeft = BOMBTIME;
-        private double timeLeftTest = BOMBTIME;
         private object Object1 = new object();
         private DateTime bombStartDateTime = DateTime.Now;
 
@@ -104,7 +103,11 @@ namespace CSGOGameObserver
                         BombStatusTextBlock.Dispatcher.BeginInvoke(
                             (Action)(() => BombStatusTextBlock.Text = $"Bomb not Planted."));
                         BombStatusTextBlock.Dispatcher.BeginInvoke(
+                            (Action)(() => BombStatusTextBlock.Foreground = new SolidColorBrush(Colors.Black)));
+                        InfoTextBlock.Dispatcher.BeginInvoke(
                             (Action)(() => InfoTextBlock.Text = $"No Kit required."));
+                        InfoTextBlock.Dispatcher.BeginInvoke(
+                            (Action)(() => InfoTextBlock.Foreground = new SolidColorBrush(Colors.Black)));
                     }
                 }
             }
@@ -115,24 +118,34 @@ namespace CSGOGameObserver
         {
             // runs on UI thread
             BombStatusTextBlock.Dispatcher.BeginInvoke(
-                (Action)(() => BombStatusTextBlock.Text = $"Bomb Planted! Time Left: {timeLeft:#0.00}s"));
+                (Action)(() => BombStatusTextBlock.Text = $"Bomb Planted! \n Time Left: {timeLeft:#0.00}s"));
+
+            BombStatusTextBlock.Dispatcher.BeginInvoke(
+                (Action) (() => BombStatusTextBlock.Foreground = new SolidColorBrush(Colors.Tomato)));
 
             //If exactly 10 seconds are Left
             if (timeLeft > 10.0 && timeLeft < 10.3)
             {
-                BombStatusTextBlock.Dispatcher.BeginInvoke(
+                InfoTextBlock.Dispatcher.BeginInvoke(
                     (Action) (() => InfoTextBlock.Text = "Kit required!"));
+                InfoTextBlock.Dispatcher.BeginInvoke(
+                    (Action)(() => InfoTextBlock.Foreground = new SolidColorBrush(Colors.Tomato)));
 
                 SystemSounds.Beep.Play();
             }
             //If exactly/less than 5 seconds is Left
             if ((timeLeft - 5.0) < 0.01)
             {
-                BombStatusTextBlock.Dispatcher.BeginInvoke(
+                InfoTextBlock.Dispatcher.BeginInvoke(
                     (Action) (() => InfoTextBlock.Text = "It's gonna Blow!"));
             }
 
             timeLeft = BOMBTIME - (DateTime.UtcNow - bombStartDateTime).TotalSeconds;
+        }
+
+        private void SettingsButton_OnClick(object sender, RoutedEventArgs e)
+        {
+            SettingGrid.Visibility = SettingGrid.Visibility == Visibility.Hidden ? Visibility.Visible : Visibility.Hidden;
         }
     }
 }

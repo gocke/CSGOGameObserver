@@ -1,0 +1,12 @@
+﻿<UserControl x:Class="CSGOGameObserver.UIControls.StartCheckBoxesUserControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             mc:Ignorable="d" >
+    <Grid Height="26">
+        <StackPanel VerticalAlignment="Center">
+            <CheckBox Name="AutoStartCheckBox" Unchecked="AutoStartCheckBox_OnUnchecked" Checked="AutoStartCheckBox_OnChecked" Content="Autostart CSGOGameObserver with Windows" Foreground="White" FontSize="14" VerticalContentAlignment="Center" />
+        </StackPanel>
+    </Grid>
+</UserControl>
