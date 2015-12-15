@@ -107,10 +107,10 @@ namespace CSGOGameObserver
 
         private void OnReceivedCsgoServerMessage(object sender, JObject gameData)
         {
-            //Prevent Racing conditions, events might be multithreaded
-
+            //Transform JSON to CSGOGameState
             CSGOGameState csgoGameState = new CSGOGameState(gameData);
 
+            //Prevent Racing conditions, events might be multithreaded
             lock (Object1)
             {
                 if (!bombPlanted)
