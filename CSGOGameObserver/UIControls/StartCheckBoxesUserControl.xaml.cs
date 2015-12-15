@@ -37,25 +37,23 @@ namespace CSGOGameObserver.UIControls
 
         private void AutoStartCheckBox_OnChecked(object sender, RoutedEventArgs e)
         {
-            // The path to the key where Windows looks for startup applications
-            RegistryKey rkApp = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true);
-
-            if (((CheckBox)sender).IsChecked == true)
-            {
-                if (!IsStartupItem())
-                    // Add the value in the registry so that the application runs at startup
-                    rkApp.SetValue(AutoStarterName, Directory.GetCurrentDirectory() + AutoStarterName);
-            }
+            SetStartup();
         }
 
         private void AutoStartCheckBox_OnUnchecked(object sender, RoutedEventArgs e)
         {
-            // The path to the key where Windows looks for startup applications
-            RegistryKey rkApp = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true);
+            SetStartup();
+        }
 
-            if (IsStartupItem())
-                // Remove the value from the registry so that the application doesn't start
-                rkApp.DeleteValue(AutoStarterName, false);
+        private void SetStartup()
+        {
+            RegistryKey rk = Registry.CurrentUser.OpenSubKey
+                ("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true);
+
+            if (AutoStartCheckBox.IsChecked == true)
+                rk?.SetValue(AutoStarterName, System.Reflection.Assembly.GetEntryAssembly().Location);
+            else
+                rk?.DeleteValue(AutoStarterName, false);
         }
 
         private bool IsStartupItem()
@@ -63,7 +61,7 @@ namespace CSGOGameObserver.UIControls
             // The path to the key where Windows looks for startup applications
             RegistryKey rkApp = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true);
 
-            if (rkApp.GetValue(AutoStarterName) == null)
+            if (rkApp != null && rkApp.GetValue(AutoStarterName) == null)
                 // The value doesn't exist, the application is not set to run at startup
                 return false;
             else

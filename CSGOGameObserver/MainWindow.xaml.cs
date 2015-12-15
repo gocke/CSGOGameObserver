@@ -56,6 +56,11 @@ namespace CSGOGameObserver
             bombTimer = new DispatcherTimer();
             bombTimer.Tick += RefreshTimer;
             bombTimer.Interval = new TimeSpan(0, 0, 0, 0, 100);
+
+            //If CSGO is started we want to change Audio/Vibrance settings
+            ThreadStart monitorCSGOThreadStart = MonitorCSGO;
+            Thread monitorCSGOThread = new Thread(monitorCSGOThreadStart);
+            monitorCSGOThread.Start();
         }
 
         //OnLoaded Run Server
@@ -66,9 +71,36 @@ namespace CSGOGameObserver
             serverThread.Start();
         }
 
+        #region CSGOStatus Control
+
+        //Monitors CSGO, activates Audi/Vibrance settings
+        private void MonitorCSGO()
+        {
+            bool wasRunning = false;
+
+            while (true)
+            {
+                if (Process.GetProcessesByName("csgo").Length != 0)
+                {
+                    wasRunning = true;
+                    VibranceAndAudioUserControlInstance.CSGOIsRunning();
+                }
+
+                if (Process.GetProcessesByName("csgo").Length == 0 && wasRunning)
+                {
+                    wasRunning = false;
+                    VibranceAndAudioUserControlInstance.CSGOWasRunning();
+                }
+
+                Thread.Sleep(5000);
+            }
+        }
+
+        #endregion
+
         public void RunServer()
         {
-            CSGOGameObserverServer csgoGameObserverServer = new CSGOGameObserverServer("http://127.0.0.1:3000/");
+            CSGOGameObserverServer csgoGameObserverServer = new CSGOGameObserverServer("http://localhost:3000/");
             csgoGameObserverServer.receivedCSGOServerMessage += OnReceivedCsgoServerMessage;
             csgoGameObserverServer.Start();
         }
@@ -143,9 +175,18 @@ namespace CSGOGameObserver
             timeLeft = BOMBTIME - (DateTime.UtcNow - bombStartDateTime).TotalSeconds;
         }
 
+        //Show Settings
         private void SettingsButton_OnClick(object sender, RoutedEventArgs e)
         {
             SettingGrid.Visibility = SettingGrid.Visibility == Visibility.Hidden ? Visibility.Visible : Visibility.Hidden;
+        }
+
+        //Saving Settings, disabeling running Vibrance
+        private void MainWindow_OnClosed(object sender, EventArgs e)
+        {
+            Properties.Settings.Default.Save();
+            VibranceAndAudioUserControlInstance.CSGOWasRunning();
+            Environment.Exit(0);
         }
     }
 }

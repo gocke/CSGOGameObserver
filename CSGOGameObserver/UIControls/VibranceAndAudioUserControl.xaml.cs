@@ -15,6 +15,10 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Diagnostics;
+using System.Diagnostics.Eventing.Reader;
+using System.Runtime.CompilerServices;
+using System.Windows.Threading;
+using CSGOGameObserver.Annotations;
 using CSGOGameObserver.AudioDeviceSwitcher;
 
 namespace CSGOGameObserver.UIControls
@@ -25,12 +29,17 @@ namespace CSGOGameObserver.UIControls
     public partial class VibranceAndAudioUserControl : UserControl
     {
         private VibranceProxy vibranceProxy;
-        List<AudioDevice> audioDeviceList = new List<AudioDevice>();
-        bool stillRunning = false;
+        private List<AudioDevice> audioDeviceList = new List<AudioDevice>();
+        private bool stillRunning = false;
+        private DispatcherTimer refreshDispatcherTimer = new DispatcherTimer();
+        private readonly Object Object1 = new Object();
+        private bool isActive;
 
         public VibranceAndAudioUserControl()
         {
             InitializeComponent();
+
+            refreshDispatcherTimer.Tick += CheckIfCSGOActive;
         }
 
         private void VibranceAndAudioUserControl_OnLoaded(object sender, RoutedEventArgs e)
@@ -50,41 +59,28 @@ namespace CSGOGameObserver.UIControls
             if (!stillRunning)
             {
                 stillRunning = true;
+                isActive = true;
 
                 #region AquireData
 
-                //Extract Data from the UI Thread
-                bool isVibranceEnabled = false;
+                //Extract Data from the UI Thread              
                 bool isAudioEnabled = false;
-
+                bool isVibranceEnabled = false;
                 int refreshRate = 0;
                 int inGameVibranceLevel = 0;
                 int windowsVibranceLevel = 0;
 
-                bool extractedValues = false;
-
-                Dispatcher.BeginInvoke(new Action(() =>
-                {
-                    isVibranceEnabled = UseVibranceSettingsCheckBox.IsChecked == true;
+                Dispatcher.Invoke(new Action(() =>
+                {                 
                     isAudioEnabled = UseAudioSettingsCheckBox.IsChecked == true;
-                    //Making sure the user won't accidentally DOS his own PC
-                    refreshRate = Convert.ToInt32(RefreshRateTextBox.Text);
-                    if (refreshRate < 100)
-                    {
-                        RefreshRateTextBox.Text = "100";
-                        refreshRate = 100;
-                    }
-
+                    isVibranceEnabled = UseVibranceSettingsCheckBox.IsChecked == true;
                     inGameVibranceLevel = (int) InGameVibranceLevelSlider.Value;
                     windowsVibranceLevel = (int) WindowsVibranceLevelSlider.Value;
 
-                    extractedValues = true;
+                    //Making sure the User doesn't DDOS himself
+                    if (int.TryParse(RefreshRateTextBox.Text, out refreshRate))
+                        refreshRate = refreshRate < 100 ? refreshRate : 100;
                 }));
-
-                while (!extractedValues)
-                {
-                    Thread.Sleep(100);
-                }
 
                 #endregion
 
@@ -93,7 +89,7 @@ namespace CSGOGameObserver.UIControls
                 //If Audio is enabled we want to switch the Audio Device when CSGO is running
                 if (isAudioEnabled)
                 {
-                    Dispatcher.BeginInvoke(new Action(() =>
+                    Dispatcher.Invoke(new Action(() =>
                     {
                         if (InGameAudioDeviceComboBox.SelectedItem != null)
                         {
@@ -110,67 +106,122 @@ namespace CSGOGameObserver.UIControls
                 //If Vibrance is enabled we want to set the Vibrance when go is running
                 if (isVibranceEnabled && windowsVibranceLevel != inGameVibranceLevel)
                 {
-                    ThreadStart vibranceThreadStart = () =>
+                    vibranceProxy = new VibranceProxy();
+
+                    if (vibranceProxy.VibranceInfo.isInitialized)
                     {
-                        //This blocks the Thread until CSGO is closed/minimised
-                        //therefore we stick in in another Thread
-                        vibranceProxy = new VibranceProxy();
-                        if (vibranceProxy.VibranceInfo.isInitialized)
+                        int csgoHandle = vibranceProxy.GetCsgoDisplayHandle();
+                        if (csgoHandle != -1)
                         {
-                            vibranceProxy.SetShouldRun(true);
-                            vibranceProxy.SetKeepActive(false);
-                            vibranceProxy.SetVibranceInGameLevel(inGameVibranceLevel);
-                            vibranceProxy.SetVibranceWindowsLevel(windowsVibranceLevel);
-                            vibranceProxy.SetSleepInterval(refreshRate);
-                            vibranceProxy.HandleDvc();
-                            vibranceProxy.UnloadLibraryEx();
-                            stillRunning = false;
+                            vibranceProxy.VibranceInfo.defaultHandle = csgoHandle;
                         }
-                    };
 
-                    Thread vibranceThread = new Thread(vibranceThreadStart);
-                    vibranceThread.Start();
+                        VibranceProxy.setDVCLevel(vibranceProxy.VibranceInfo.defaultHandle, getNVIDIAValue(inGameVibranceLevel));
+
+                        refreshDispatcherTimer.Interval = new TimeSpan(0,0,0,0, refreshRate);
+                        refreshDispatcherTimer.Start();
+                    }
                 }
-
                 #endregion
             }
         }
 
         public void CSGOWasRunning()
         {
-            #region AquireData
-            //Extract Data from the UI Thread
-            bool isAudioEnabled = false;
-            bool extractedValues = false;
-
-            Dispatcher.BeginInvoke(new Action(() =>
+            lock (Object1)
             {
-                isAudioEnabled = UseAudioSettingsCheckBox.IsChecked == true;
-                extractedValues = true;
-            }));
+                isActive = false;
+                //disable DispatcherTimer
+                refreshDispatcherTimer.Stop();
 
-            while (!extractedValues)
-            {
-                Thread.Sleep(100);
-            }
+                #region AquireData
 
-            #endregion
+                //Extract Data from the UI Thread           
+                bool isAudioEnabled = false;
+                bool isVibranceEnabled = false;
+                int inGameVibranceLevel = 0;
+                int windowsVibranceLevel = 0;
 
-            if (isAudioEnabled)
-            {
-                Dispatcher.BeginInvoke(new Action(() =>
+                Dispatcher.Invoke(new Action(() =>
                 {
-                    if (WindowsAudioDeviceComboBox.SelectedItem != null)
-                    {
-                        int audioDevice = ((AudioDevice)WindowsAudioDeviceComboBox.SelectedItem).DeviceID;
-                        AudioDeviceController.SetAudioDevice(audioDevice);
-                    }
+                    isAudioEnabled = UseAudioSettingsCheckBox.IsChecked == true;
+                    isVibranceEnabled = UseVibranceSettingsCheckBox.IsChecked == true;
+                    inGameVibranceLevel = (int) InGameVibranceLevelSlider.Value;
+                    windowsVibranceLevel = (int) WindowsVibranceLevelSlider.Value;
                 }));
+                #endregion
+
+                #region Audio
+
+                if (isAudioEnabled)
+                {
+                    Dispatcher.Invoke(new Action(() =>
+                    {
+                        if (WindowsAudioDeviceComboBox.SelectedItem != null)
+                        {
+                            int audioDevice = ((AudioDevice) WindowsAudioDeviceComboBox.SelectedItem).DeviceID;
+                            AudioDeviceController.SetAudioDevice(audioDevice);
+                        }
+                    }));
+                }
+
+                #endregion
+
+                #region Vibrance
+
+                //If Vibrance is enabled we want to set the Vibrance when go is running
+                if (isVibranceEnabled && windowsVibranceLevel != inGameVibranceLevel)
+                {
+                    if (vibranceProxy != null && vibranceProxy.VibranceInfo.isInitialized)
+                    {
+                        //vibranceProxy.VibranceInfo.displayHandles.ForEach(handle => VibranceProxy.setDVCLevel(handle, 0));
+                        VibranceProxy.setDVCLevel(vibranceProxy.VibranceInfo.defaultHandle, getNVIDIAValue(windowsVibranceLevel));
+
+                        //vibranceProxy.UnloadLibraryEx();
+                        stillRunning = false;
+                    }
+                }
+
+                #endregion
             }
         }
 
-        
+        //Checks if the Window is minimized and changes Digital Vibrance accordingly
+        private void CheckIfCSGOActive(object sender, EventArgs eventArgs)
+        {
+            lock (Object1)
+            {
+                IntPtr hwnd = IntPtr.Zero;
+                if (stillRunning && VibranceProxy.isCsgoStarted(ref hwnd) && !VibranceProxy.isCsgoActive(ref hwnd) && isActive)
+                {
+                    isActive = false;
+                   
+                    int windowsVibranceLevel = 0;
 
+                    Dispatcher.Invoke(new Action(() =>
+                    {
+                        windowsVibranceLevel = (int)WindowsVibranceLevelSlider.Value;
+                    }));
+
+                    VibranceProxy.setDVCLevel(vibranceProxy.VibranceInfo.defaultHandle, getNVIDIAValue(windowsVibranceLevel));
+                }
+                if (stillRunning && VibranceProxy.isCsgoStarted(ref hwnd) && VibranceProxy.isCsgoActive(ref hwnd) && !isActive)
+                {
+                    isActive = true;
+
+                    int inGameVibranceLevel = 0;
+
+                    Dispatcher.Invoke(new Action(() =>
+                    {
+                        inGameVibranceLevel = (int)InGameVibranceLevelSlider.Value;
+                    }));
+
+                    VibranceProxy.setDVCLevel(vibranceProxy.VibranceInfo.defaultHandle, getNVIDIAValue(inGameVibranceLevel));
+                }
+            }
+        }
+
+        //Fills the audiodevices Combobox
         private void PopulateAudioDeviceCombobox()
         {
             audioDeviceList = AudioDeviceController.GetAudioDevices();
@@ -180,6 +231,24 @@ namespace CSGOGameObserver.UIControls
                 WindowsAudioDeviceComboBox.ItemsSource = audioDeviceList;
                 InGameAudioDeviceComboBox.ItemsSource = audioDeviceList;
             }));
+        }
+
+        //Transforms 0-100 to 0-63 with negativ values
+        public int getNVIDIAValue(int value)
+        {
+            int NVIDIADEFAULT = 50;
+            int NVIDIARANGE = 63;
+
+            double onePercent = NVIDIARANGE/50.0;
+
+            int returnValue;
+
+            if (value >= NVIDIADEFAULT)
+                returnValue = (int) (onePercent*(value - NVIDIADEFAULT));
+            else
+                returnValue = (int) (onePercent*(NVIDIADEFAULT - value)*-1);
+
+            return returnValue;
         }
     }
 }

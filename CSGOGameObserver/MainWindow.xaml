@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:CSGOGameObserver"
         xmlns:uiControls="clr-namespace:CSGOGameObserver.UIControls"
         mc:Ignorable="d"
-        Title="MainWindow" Height="400" Width="400" Loaded="MainWindow_OnLoaded" Background="SteelBlue">
+        Title="MainWindow" Height="400" Width="400" Loaded="MainWindow_OnLoaded" Background="SteelBlue" Closed="MainWindow_OnClosed">
     <Window.Resources>
         <Style x:Key="NoHoverButtonStyle" TargetType="{x:Type Button}">
             <Setter Property="Background" Value="Green"/>

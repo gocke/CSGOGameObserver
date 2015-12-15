@@ -163,21 +163,21 @@ namespace CSGOGameObserver.UIControls
             EntryPoint = "?setDVCLevel@vibrance@vibranceDLL@@QAE_NHH@Z",
             CallingConvention = CallingConvention.StdCall,
             CharSet = CharSet.Auto)]
-        static extern bool setDVCLevel([In] int defaultHandle, [In] int level);
+        public static extern bool setDVCLevel([In] int defaultHandle, [In] int level);
 
         [DllImport(
             "vibranceDLL.dll",
             EntryPoint = "?isCsgoActive@vibrance@vibranceDLL@@QAE_NPAPAUHWND__@@@Z",
             CallingConvention = CallingConvention.StdCall,
             CharSet = CharSet.Auto)]
-        static extern bool isCsgoActive(ref IntPtr hwnd);
+        public static extern bool isCsgoActive(ref IntPtr hwnd);
 
         [DllImport(
             "vibranceDLL.dll",
             EntryPoint = "?isCsgoStarted@vibrance@vibranceDLL@@QAE_NPAPAUHWND__@@@Z",
             CallingConvention = CallingConvention.StdCall,
             CharSet = CharSet.Ansi)]
-        static extern bool isCsgoStarted(ref IntPtr hwnd);
+        public static extern bool isCsgoStarted(ref IntPtr hwnd);
 
         [DllImport(
             "vibranceDLL.dll",
@@ -236,14 +236,7 @@ namespace CSGOGameObserver.UIControls
                 VibranceInfo.szGpuName = buffer.ToString();
                 VibranceInfo.defaultHandle = enumerateNvidiaDisplayHandle(0);
 
-                NV_DISPLAY_DVC_INFO info = new NV_DISPLAY_DVC_INFO();
-                if (getDVCInfo(ref info, VibranceInfo.defaultHandle))
-                {
-                    if (info.currentLevel != VibranceInfo.userVibranceSettingDefault)
-                    {
-                        setDVCLevel(VibranceInfo.defaultHandle, VibranceInfo.userVibranceSettingDefault);
-                    }
-                }
+                //NV_DISPLAY_DVC_INFO info = new NV_DISPLAY_DVC_INFO();
 
                 VibranceInfo.isInitialized = true;
             }
@@ -281,7 +274,7 @@ namespace CSGOGameObserver.UIControls
             return false;
         }
 
-        private int GetCsgoDisplayHandle()
+        public int GetCsgoDisplayHandle()
         {
             Screen primaryScreen = null;
             IntPtr hwnd = IntPtr.Zero;
