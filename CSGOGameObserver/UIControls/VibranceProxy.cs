@@ -23,6 +23,8 @@ namespace CSGOGameObserver.UIControls
     
     public class VibranceProxy
     {
+        #region DLL Imports
+
         [DllImport(
             "vibranceDLL.dll",
             EntryPoint = "?initializeLibrary@vibrance@vibranceDLL@@QAE_NXZ",
@@ -36,7 +38,6 @@ namespace CSGOGameObserver.UIControls
             CallingConvention = CallingConvention.StdCall,
             CharSet = CharSet.Auto)]
         static extern bool unloadLibrary();
-
 
         [DllImport(
             "vibranceDLL.dll",
@@ -94,6 +95,7 @@ namespace CSGOGameObserver.UIControls
             CharSet = CharSet.Ansi)]
         static extern int getAssociatedNvidiaDisplayHandle(string deviceName, [In] int length);
 
+        #endregion
 
         public const int NVAPI_MAX_PHYSICAL_GPUS = 64;
 
@@ -101,7 +103,7 @@ namespace CSGOGameObserver.UIControls
 
         public VIBRANCE_INFO VibranceInfo;
 
-        public VibranceProxy(bool isSilenced = false)
+        public VibranceProxy()
         {
             try
             {
@@ -131,20 +133,17 @@ namespace CSGOGameObserver.UIControls
 
         public int GetCsgoDisplayHandle()
         {
-            Screen primaryScreen = null;
             IntPtr hwnd = IntPtr.Zero;
             if (isCsgoStarted(ref hwnd) && hwnd != IntPtr.Zero)
             {
-                primaryScreen = System.Windows.Forms.Screen.FromHandle(hwnd);
-                if (primaryScreen != null)
-                {
-                    string deviceName = primaryScreen.DeviceName;
-                    GCHandle handle = GCHandle.Alloc(deviceName, GCHandleType.Pinned);
-                    int id = getAssociatedNvidiaDisplayHandle(deviceName, deviceName.Length);
-                    handle.Free();
+                var primaryScreen = System.Windows.Forms.Screen.FromHandle(hwnd);
 
-                    return id;
-                }
+                string deviceName = primaryScreen.DeviceName;
+                GCHandle handle = GCHandle.Alloc(deviceName, GCHandleType.Pinned);
+                int id = getAssociatedNvidiaDisplayHandle(deviceName, deviceName.Length);
+                handle.Free();
+
+                return id;
             }
 
             return -1;
@@ -157,7 +156,8 @@ namespace CSGOGameObserver.UIControls
 
         private void EnumerateDisplayHandles()
         {
-            for (int i = 0, displayHandle = 0; displayHandle != -1; i++)
+            int displayHandle = 0;
+            for (int i = 0; displayHandle != -1; i++)
             {
                 if (VibranceInfo.displayHandles == null)
                     VibranceInfo.displayHandles = new List<int>();

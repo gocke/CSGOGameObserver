@@ -41,7 +41,7 @@ namespace CSGOGameObserver
     /// </summary>
     public partial class MainWindow : Window
     {
-        const double BOMBTIME = 40.0;
+        const double BOMBTIME = 36.0;
 
         private Boolean bombPlanted;
         private DispatcherTimer bombTimer;
@@ -63,7 +63,7 @@ namespace CSGOGameObserver
             monitorCSGOThread.Start();
         }
 
-        //OnLoaded Run Server
+        //OnLoaded Run Server for Gamestate
         private void MainWindow_OnLoaded(object sender, RoutedEventArgs e)
         {
             ThreadStart serverThreadStart = new ThreadStart(RunServer);
@@ -97,6 +97,8 @@ namespace CSGOGameObserver
         }
 
         #endregion
+
+        #region GameState 
 
         public void RunServer()
         {
@@ -163,7 +165,7 @@ namespace CSGOGameObserver
                 InfoTextBlock.Dispatcher.BeginInvoke(
                     (Action)(() => InfoTextBlock.Foreground = new SolidColorBrush(Colors.Tomato)));
 
-                SystemSounds.Beep.Play();
+                //SystemSounds.Beep.Play();
             }
             //If exactly/less than 5 seconds is Left
             if ((timeLeft - 5.0) < 0.01)
@@ -174,6 +176,10 @@ namespace CSGOGameObserver
 
             timeLeft = BOMBTIME - (DateTime.UtcNow - bombStartDateTime).TotalSeconds;
         }
+
+        #endregion
+
+        #region Events
 
         //Show Settings
         private void SettingsButton_OnClick(object sender, RoutedEventArgs e)
@@ -188,5 +194,7 @@ namespace CSGOGameObserver
             VibranceAndAudioUserControlInstance.CSGOWasRunning();
             Environment.Exit(0);
         }
+
+        #endregion
     }
 }

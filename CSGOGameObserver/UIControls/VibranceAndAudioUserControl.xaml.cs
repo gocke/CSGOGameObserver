@@ -29,11 +29,18 @@ namespace CSGOGameObserver.UIControls
     public partial class VibranceAndAudioUserControl : UserControl
     {
         private VibranceProxy vibranceProxy;
+        private int csgoHandle;
         private List<AudioDevice> audioDeviceList = new List<AudioDevice>();
-        private bool stillRunning = false;
+        
+        //
+        // Flow Control Vars
+        //
         private DispatcherTimer refreshDispatcherTimer = new DispatcherTimer();
-        private readonly Object Object1 = new Object();
+        private readonly Object LockObject = new Object();
+        private bool stillRunning = false;
         private bool isActive;
+
+        #region Initialization
 
         public VibranceAndAudioUserControl()
         {
@@ -53,6 +60,8 @@ namespace CSGOGameObserver.UIControls
 
             System.Runtime.InteropServices.Marshal.PrelinkAll(typeof(VibranceProxy));
         }
+
+        #endregion
 
         public void CSGOIsRunning()
         {
@@ -110,15 +119,17 @@ namespace CSGOGameObserver.UIControls
 
                     if (vibranceProxy.VibranceInfo.isInitialized)
                     {
-                        int csgoHandle = vibranceProxy.GetCsgoDisplayHandle();
-                        if (csgoHandle != -1)
+                        csgoHandle = vibranceProxy.GetCsgoDisplayHandle();
+
+                        while (csgoHandle == -1)
                         {
-                            vibranceProxy.VibranceInfo.defaultHandle = csgoHandle;
+                            csgoHandle = vibranceProxy.GetCsgoDisplayHandle();
                         }
 
-                        VibranceProxy.setDVCLevel(vibranceProxy.VibranceInfo.defaultHandle, getNVIDIAValue(inGameVibranceLevel));
+                        //vibranceProxy.VibranceInfo.defaultHandle = csgoHandle;
+                        VibranceProxy.setDVCLevel(csgoHandle, getNVIDIAValue(inGameVibranceLevel));
 
-                        refreshDispatcherTimer.Interval = new TimeSpan(0,0,0,0, refreshRate);
+                        refreshDispatcherTimer.Interval = new TimeSpan(0, 0, 0, 0, refreshRate);
                         refreshDispatcherTimer.Start();
                     }
                 }
@@ -128,7 +139,7 @@ namespace CSGOGameObserver.UIControls
 
         public void CSGOWasRunning()
         {
-            lock (Object1)
+            lock (LockObject)
             {
                 isActive = false;
                 //disable DispatcherTimer
@@ -175,9 +186,10 @@ namespace CSGOGameObserver.UIControls
                     if (vibranceProxy != null && vibranceProxy.VibranceInfo.isInitialized)
                     {
                         //vibranceProxy.VibranceInfo.displayHandles.ForEach(handle => VibranceProxy.setDVCLevel(handle, 0));
-                        VibranceProxy.setDVCLevel(vibranceProxy.VibranceInfo.defaultHandle, getNVIDIAValue(windowsVibranceLevel));
+                        VibranceProxy.setDVCLevel(csgoHandle, getNVIDIAValue(windowsVibranceLevel));
 
-                        //vibranceProxy.UnloadLibraryEx();
+                        vibranceProxy.UnloadLibraryEx();
+                        csgoHandle = -1;
                         stillRunning = false;
                     }
                 }
@@ -189,34 +201,39 @@ namespace CSGOGameObserver.UIControls
         //Checks if the Window is minimized and changes Digital Vibrance accordingly
         private void CheckIfCSGOActive(object sender, EventArgs eventArgs)
         {
-            lock (Object1)
+            lock (LockObject)
             {
                 IntPtr hwnd = IntPtr.Zero;
-                if (stillRunning && VibranceProxy.isCsgoStarted(ref hwnd) && !VibranceProxy.isCsgoActive(ref hwnd) && isActive)
+                if (stillRunning && isActive 
+                    && VibranceProxy.isCsgoStarted(ref hwnd) 
+                    && !VibranceProxy.isCsgoActive(ref hwnd))
                 {
                     isActive = false;
-                   
+
                     int windowsVibranceLevel = 0;
 
                     Dispatcher.Invoke(new Action(() =>
                     {
-                        windowsVibranceLevel = (int)WindowsVibranceLevelSlider.Value;
+                        windowsVibranceLevel = (int) WindowsVibranceLevelSlider.Value;
                     }));
 
-                    VibranceProxy.setDVCLevel(vibranceProxy.VibranceInfo.defaultHandle, getNVIDIAValue(windowsVibranceLevel));
+                    VibranceProxy.setDVCLevel(csgoHandle, getNVIDIAValue(windowsVibranceLevel));
                 }
-                if (stillRunning && VibranceProxy.isCsgoStarted(ref hwnd) && VibranceProxy.isCsgoActive(ref hwnd) && !isActive)
+                if (stillRunning && !isActive 
+                    && VibranceProxy.isCsgoStarted(ref hwnd) 
+                    && VibranceProxy.isCsgoActive(ref hwnd))
                 {
+
                     isActive = true;
 
                     int inGameVibranceLevel = 0;
 
                     Dispatcher.Invoke(new Action(() =>
                     {
-                        inGameVibranceLevel = (int)InGameVibranceLevelSlider.Value;
+                        inGameVibranceLevel = (int) InGameVibranceLevelSlider.Value;
                     }));
 
-                    VibranceProxy.setDVCLevel(vibranceProxy.VibranceInfo.defaultHandle, getNVIDIAValue(inGameVibranceLevel));
+                    VibranceProxy.setDVCLevel(csgoHandle, getNVIDIAValue(inGameVibranceLevel));
                 }
             }
         }
