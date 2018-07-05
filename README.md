@@ -22,6 +22,5 @@
 
 ## About me/Contact ##
 
-* Johannes Gocke
 * email: johannes_gocke@hotmail.de
 * steam: http://steamcommunity.com/id/master117/
